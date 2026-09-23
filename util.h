@@ -13,18 +13,38 @@
 template <typename T>
 std::set<T> setIntersection(std::set<T>& s1, std::set<T>& s2)
 {
+    //use iterator
 
+    std::set<T> intersectionSet;
 
+    for(typename std::set<T>::iterator it = s1.begin(); it != s1.end(); ++it){ //n runtime
+        if(s2.find(*it) != s2.end()){ //log n runtime, checks to see if the item is in s2
+            intersectionSet.insert(*it); //adds to intersection set if both s1 and s2 contain the element
+        }
+    }
 
-
+    return intersectionSet;
 
 }
+
 template <typename T>
 std::set<T> setUnion(std::set<T>& s1, std::set<T>& s2)
 {
+    
+    std::set<T> unionSet;
 
+    //inserts items for set s1
+    for(typename std::set<T>::iterator it = s1.begin(); it != s1.end(); ++it){
+        unionSet.insert(*it);
+    }
 
+    //inserts iterms from set s2
+    //*no if needed as the union set will only keep one copy if a duplicate is found
+    for(typename std::set<T>::iterator it = s2.begin(); it != s2.end(); ++it){
+        unionSet.insert(*it);
+    }
 
+    return unionSet;
 
 
 }
