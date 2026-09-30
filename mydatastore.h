@@ -21,6 +21,9 @@ private:
     //Container 3: List of All Products
     std::set<Product*> listofProducts_;
 
+    //Container 4: Cart
+    std::map<std::string, std::vector<Product*>> carts_;
+
 public:
     virtual ~MyDataStore(); //destructor
     MyDataStore(); //constructor
@@ -46,6 +49,11 @@ public:
      */
     virtual void dump(std::ostream& ofile);
 
+    void addToCart (std::string username,Product* p);
+
+    void viewCart (std::string username);
+
+    void buyCart (std::string username);
 
 };
 

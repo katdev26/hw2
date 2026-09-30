@@ -15,7 +15,14 @@ using namespace std;
 
 MyDataStore::~MyDataStore() //destructor
 {
+    for(std::set<Product*>::iterator it = listofProducts_.begin(); it != listofProducts_.end(); ++it){
+        delete(*it);
+    }
 
+    for(std::map<std::string,User*>::iterator it = users_.begin(); it != users_.end(); ++it){
+        delete(it->second); 
+    }
+   
 }
 
 MyDataStore::MyDataStore() //constructor
@@ -94,6 +101,76 @@ std::vector<Product*> MyDataStore::search(std::vector<std::string>& terms, int t
 */
 void MyDataStore::dump(std::ostream& ofile)
 {
+    ofile << "<products>" << endl;
+
+    for(std::set<Product*>::iterator it = listofProducts_.begin(); it != listofProducts_.end(); ++it){
+        (*it)->dump(ofile);
+    }
+   
+    ofile << "</products>" << endl;
+
+    ofile << "<users>" << endl;
+
+    for(std::map<std::string,User*>::iterator it = users_.begin(); it != users_.end(); ++it){
+        it->second->dump(ofile); //uses it->second to get the user
+    }
+   
+    ofile << "</users>" << endl;
 
 }
 
+void MyDataStore::addToCart (std::string username,Product* p){
+    
+    std::string usernameKey = convToLower(username);
+    if(users_.find(usernameKey) == users_.end()){ //check to see if invalid username
+        cout << "Invalid request" << endl;
+        return;
+    }
+    else{
+        carts_[usernameKey].push_back(p); //adds product to the cart through FIFO
+    }
+    
+}
+
+void MyDataStore::viewCart (std::string username){
+    
+    std::string usernameKey = convToLower(username);
+    if(users_.find(usernameKey) == users_.end()){ //check to see if invalid username
+        cout << "Invalid username" << endl;
+        return;
+    }
+    else{
+        for(size_t i = 0; i < carts_[usernameKey].size(); i++){ //loops through items in the cart
+            cout << "Item " << i+1 << endl; //i+1 is necessary so the first item is Item 1 and not Item 0
+            cout << carts_[usernameKey][i]->displayString() << endl; //displays each item of the cart
+        }
+    }
+    
+}
+
+void MyDataStore::buyCart (std::string username){
+    
+    std::string usernameKey = convToLower(username);
+
+    if(users_.find(usernameKey) == users_.end()){ //check to see if invalid username
+        cout << "Invalid username" << endl;
+        return;
+    }
+    else{
+        User* thisUser = users_[usernameKey]; //obtaining user's account to check and change balance
+        vector<Product*> remainingProduct; //vector to store remaining product (products that can't be bought)
+
+        for(size_t i = 0; i < carts_[usernameKey].size(); i++){ //loops through items in the cart
+            Product* p = carts_[usernameKey][i]; //gets current product
+            if(p->getQty() > 0 && p->getPrice() <= thisUser->getBalance()){
+                p->subtractQty(1); //subtract one product from quantity since it is bought
+                thisUser->deductAmount(p->getPrice()); //deduct's product's price from user's balance
+            }
+            else{
+                remainingProduct.push_back(p);
+            }
+        }
+
+        carts_[usernameKey] = remainingProduct; //only the items that weren't bought stay in the cart
+    }
+}
